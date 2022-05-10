@@ -1,1 +1,34 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spacey Invaders</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cute+Font&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class = "wrap">
+        <header>Spacey Invaders</header>
+        <div class = "game-wrapper">
+            <div class = "game"></div>
+            <div class="congratulations">
+                <h1>Congratulations!</h1>
+                <h2>You won the game.</h2>
+                <button class="btn" onclick="window.location.reload()">Restart</button>
+            </div>
+            <div>
+                <h1>GAME OVER</h1>
+                <h2>You lost :(</h2>
+                <button class="btn" onclick="window.location.reload()">Restart</button>
+            </div>
+        </div>
+        <script src="script.js"></script>
+        <footer>Left/right keys to move</footer>
+    </div>
+    <script src="./background.png"></script>
+</body>
+</html>

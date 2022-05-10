@@ -1,1 +1,29 @@
+body {
+    background-image: url("background.png");
+    background-repeat: repeat;
+    background: black;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    margin: 0;
+    font: 14px;
+}
 
+.wrap {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+header {
+    text-align: center;
+    background: aliceblue;
+    padding: 10px;
+    font-family: 'Cute Font', cursive;
+}
+
+footer {
+    text-align: center;
+    font-size: 11px;
+    background: black;
+    color: aliceblue;
+}
