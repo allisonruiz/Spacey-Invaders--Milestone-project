@@ -1,12 +1,13 @@
 body {
     background-image: url("background.png");
     background-repeat: repeat;
-    background: black;
+    background: aliceblue;
     height: 100%;
     width: 100%;
     overflow: hidden;
     margin: 0;
-    font: 14px;
+    font: 7px;
+    color: cornflowerblue;
 }
 
 .wrap {
@@ -19,11 +20,13 @@ header {
     background: aliceblue;
     padding: 10px;
     font-family: 'Cute Font', cursive;
+    color: cornflowerblue;
+    font-size: larger;
 }
 
 footer {
     text-align: center;
-    font-size: 11px;
-    background: black;
-    color: aliceblue;
+    font-size: 10px;
+    background: aliceblue;
+    color: cornflowerblue;
 }
