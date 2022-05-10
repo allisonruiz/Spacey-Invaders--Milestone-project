@@ -1,7 +1,7 @@
 body {
-    background-image: url("assets/background.png");
+    background-image: url("assets/space.jpg");
     background-repeat: repeat;
-    background: aliceblue;
+    background-size: 17em 14em;
     height: 100%;
     width: 100%;
     overflow: hidden;
@@ -36,7 +36,7 @@ footer {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: aliceblue;
+
 }
 
 .game {
