@@ -38,14 +38,10 @@ function rectsIntersect(r1, r2) {
     );
 }
 
-function setPosition($element, x, y) {
-    $element.style.transform = `translate(${x}px, ${y}px)`;
+function setPosition(el, x, y) {
+    el.style.transform = `translate(${x}px, ${y}px)`;
 };
 
-function setSize($element, x, y){
-    $element.style.width = `${width}px`;
-    $element.style.height = "auto";
-}
 
 function createPlayer($container) {
     GAME_STATE.x_pos= GAME_WIDTH/2;
@@ -55,7 +51,6 @@ function createPlayer($container) {
     $player.className = "player";
     $container.appendChild($player);
     setPosition($player, GAME_STATE.x_pos, GAME_STATE.y_pos);
-    setSize($player, GAME_STATE.spaceship_width);
 }
 function destroyPlayer($container, player) {
     $container.removeChild(player);
@@ -68,10 +63,9 @@ function updatePlayer(){
         GAME_STATE.x_pos += 3;
     }
 
+    const player = document.querySelector(".player");
+    setPosition(player, GAME_STATE.playerX, GAME_STATE.playerY);  
 }
-
-const $player = document.querySelector(".player");
-setPosition($player, GAME_STATE.x_pos, GAME_STATE.y_pos);
 
 function keyPress(event){
     if(event.keyCode === KEY_RIGHT){
@@ -87,16 +81,17 @@ function keyRelease(event){
         GAME_STATE.move_left = false;
     }
 }
+function init() {
+    const $container = document.querySelector(".game");
+    createPlayer($container);
+}
 
 function update(){
     updatePlayer()
 }
 
 
-const $container = document.querySelector(".main");
-createPlayer($container);
-
-window.addEventListener("keydown", keyPress);
-window.addEventListener("keyup", keyRelease);
-
-
+init();
+window.addEventListener("keydown", onKeyDown);
+window.addEventListener("keyup", onKeyUp);
+window.requestAnimationFrame(update);
