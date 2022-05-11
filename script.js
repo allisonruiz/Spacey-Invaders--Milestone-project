@@ -51,7 +51,7 @@ function createPlayer($container) {
     GAME_STATE.x_pos= GAME_WIDTH/2;
     GAME_STATE.y_pos = GAME_HEIGHT-50;
     const $player = document.createElement("img");
-    $player.src = "img/spaceship.jpg";
+    $player.src = "img/Player.png";
     $player.className = "player";
     $container.appendChild($player);
     setPosition($player, GAME_STATE.x_pos, GAME_STATE.y_pos);
