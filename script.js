@@ -2,8 +2,8 @@ const KEY_CODE_LEFT = 37;
 const KEY_CODE_RIGHT = 39;
 const KEY_CODE_SPACE = 32;
 
-const GAME_WIDTH = 900;
-const GAME_HEIGHT = 700;
+const GAME_WIDTH = 800;
+const GAME_HEIGHT = 600;
 
 const PLAYER_WIDTH = 20;
 const PLAYER_MAX_SPEED = 600.0;
@@ -28,6 +28,14 @@ const GAME_STATE = {
     gaveOver:false
 };
 
+function rectsIntersect(r1, r2){
+    return !(
+        r2.left > r1.right ||
+        r2.right < r1.left ||
+        r2.top > r1.bottom ||
+        r2.bottom < r1.top
+      );
+}
 
 
 function setPosition(el, x, y) {
@@ -57,8 +65,8 @@ function updatePlayer(dt, $container){
         GAME_STATE.playerX += dt * PLAYER_MAX_SPEED;
     }
 
-    const player = document.querySelector(".player");
-    setPosition(player, GAME_STATE.playerX, GAME_STATE.playerY);  
+    const $player = document.querySelector(".player");
+    setPosition($player, GAME_STATE.playerX, GAME_STATE.playerY);  
 }
 
 function onKeyDown(event){
@@ -81,7 +89,8 @@ function init() {
 }
 
 function update(){
-    updatePlayer()
+    updatePlayer();
+    window.requestAnimationFrame(update);
 }
 
 
@@ -89,3 +98,5 @@ init();
 window.addEventListener("keydown", onKeyDown);
 window.addEventListener("keyup", onKeyUp);
 window.requestAnimationFrame(update);
+
+update();
