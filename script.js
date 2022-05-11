@@ -29,14 +29,6 @@ const GAME_STATE = {
 };
 
 
-function rectsIntersect(r1, r2) {
-    return !(
-        r2.left > r1.right ||
-        r2.right < r1.left ||
-        r2.top > r1.bottom ||
-        r2.bottom < r1.top
-    );
-}
 
 function setPosition(el, x, y) {
     el.style.transform = `translate(${x}px, ${y}px)`;
@@ -44,40 +36,42 @@ function setPosition(el, x, y) {
 
 
 function createPlayer($container) {
-    GAME_STATE.x_pos= GAME_WIDTH/2;
-    GAME_STATE.y_pos = GAME_HEIGHT-50;
+    GAME_STATE.playerX= GAME_WIDTH/2;
+    GAME_STATE.playerY = GAME_HEIGHT-50;
     const $player = document.createElement("img");
     $player.src = "img/spaceship.png";
     $player.className = "player";
     $container.appendChild($player);
-    setPosition($player, GAME_STATE.x_pos, GAME_STATE.y_pos);
+    setPosition($player, GAME_STATE.playerX, GAME_STATE.playerY);
 }
+
 function destroyPlayer($container, player) {
     $container.removeChild(player);
-    GAME_STATE
+    GAME_STATE.gaveOver = true;
 }
-function updatePlayer(){
-    if(GAME_STATE.move_left){
-        GAME_STATE.x_pos -= 3;
-    } if(GAME_STATE.move_right){
-        GAME_STATE.x_pos += 3;
+
+function updatePlayer(dt, $container){
+    if(GAME_STATE.leftPressed){
+        GAME_STATE.playerX -= dt * PLAYER_MAX_SPEED;
+    } if(GAME_STATE.rightPressed){
+        GAME_STATE.playerX += dt * PLAYER_MAX_SPEED;
     }
 
     const player = document.querySelector(".player");
     setPosition(player, GAME_STATE.playerX, GAME_STATE.playerY);  
 }
 
-function keyPress(event){
-    if(event.keyCode === KEY_RIGHT){
+function onKeyDown(event){
+    if(event.keyCode === KEY_CODE_RIGHT){
         GAME_STATE.move_right = true;
-    } else if(event.keyCode === KEY_LEFT){
+    } else if(event.keyCode === KEY_CODE_LEFT){
         GAME_STATE.move_left = true;
     }
 }
-function keyRelease(event){
-    if(event.keyCode === KEY_RIGHT){
+function onKeyUp(event){
+    if(event.keyCode === KEY_CODE_RIGHT){
         GAME_STATE.move_right = false;
-    } else if(event.keyCode === KEY_LEFT){
+    } else if(event.keyCode === KEY_CODE_LEFT){
         GAME_STATE.move_left = false;
     }
 }
