@@ -10,14 +10,14 @@ const PLAYER_MAX_SPEED = 600.0;
 const LASER_MAX_SPEED = 300.0;
 const LASER_COOLDOWN = 1.0;
 
-const enemiesPerRow = 10;
-const enemyHorizontalPadding = 80;
-const enemyVerticalPadding = 70;
-const enemyVerticalSpacing = 80;
-const enemyCoolDown = 1.0;
+const ENEMIES_PER_ROW = 10;
+const ENEMY_HORIZONTAL_PADDING = 80;
+const ENEMY_VERTICAL_PADDING = 70;
+const ENEMY_VERTICAL_SPACING = 80;
+const ENEMY_COOLDOWN = 5.0;
 
 
-const gameState = {
+const STATE = {
     lastTime: Date.now(),
     leftPressed: false,
     rightPressed: false,
@@ -28,6 +28,7 @@ const gameState = {
     gaveOver:false
 };
 
+
 function rectsIntersect(r1, r2) {
     return !(
         r2.left > r1.right ||
@@ -37,9 +38,41 @@ function rectsIntersect(r1, r2) {
     );
 }
 
-function setPosition(el, x, y) {
-    el.style.transform = `translate(${x}px, ${y}px)`;
+function setPosition($element, x, y) {
+    $element.style.transform = `translate(${x}px, ${y}px)`;
+};
+
+function setSize($element, x, y){
+    $element.style.width = `${width}px`;
+    $element.style.height = "auto";
 }
+
+function createPlayer($container) {
+    STATE.playerX = GAME_WIDTH / 2;
+    STATE.playerY = GAME_HEIGHT - 50;
+    const $player = document.createElement("img");
+    $player.src = "assets/player.png";
+    $player.className = "player";
+    $container.appendChild($player);
+    setPosition($player, STATE.playerX, STATE.playerY);
+    setSize($player, STATE.player_width);
+}
+function keyPress(event){
+    if(event.keyCode === KEY_RIGHT){
+        STATE.move_right = true;
+    } else if(event.keyCode === KEY_LEFT){
+        STATE.move_left = true;
+    }
+}
+function keyRelease(event){
+    if(event.keyCode === KEY_RIGHT){
+        STATE.move_right = false;
+    } else if(event.keyCode === KEY_LEFT){
+        STATE.move_left = false;
+    }
+}
+
+function update()
 
 function clamp(v, min, max) {
     if (v < min) {
@@ -57,12 +90,10 @@ function rand(min, max) {
     return min + Math.random() * (max - min);
 }
 
-function createPlayer($container) {
-    gameState.playerX = GAME_WIDTH / 2;
-    gameState.playerY = GAME_HEIGHT - 50;
-    const $player = document.createElement("img");
-    $player.src = "assets/player.png";
-    $player.className = "player";
-    $container.appendChild($player);
-    setPosition($player, gameState.playerX, gameState.playerY);
-}
+
+
+const $container = document.querySelector(".main");
+createPlayer($container);
+
+window.addEventListener("keydown", keyPress);
+window.addEventListener("keyup", keyRelease)
