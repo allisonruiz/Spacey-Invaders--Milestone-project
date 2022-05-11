@@ -17,7 +17,7 @@ const ENEMY_VERTICAL_SPACING = 80;
 const ENEMY_COOLDOWN = 5.0;
 
 
-const STATE = {
+const GAME_STATE = {
     lastTime: Date.now(),
     leftPressed: false,
     rightPressed: false,
@@ -48,52 +48,55 @@ function setSize($element, x, y){
 }
 
 function createPlayer($container) {
-    STATE.playerX = GAME_WIDTH / 2;
-    STATE.playerY = GAME_HEIGHT - 50;
+    GAME_STATE.x_pos= GAME_WIDTH/2;
+    GAME_STATE.y_pos = GAME_HEIGHT-50;
     const $player = document.createElement("img");
-    $player.src = "assets/player.png";
+    $player.src = "img/spaceship.png";
     $player.className = "player";
     $container.appendChild($player);
-    setPosition($player, STATE.playerX, STATE.playerY);
-    setSize($player, STATE.player_width);
+    setPosition($player, GAME_STATE.x_pos, GAME_STATE.y_pos);
+    setSize($player, GAME_STATE.spaceship_width);
 }
+function destroyPlayer($container, player) {
+    $container.removeChild(player);
+    GAME_STATE
+}
+function updatePlayer(){
+    if(GAME_STATE.move_left){
+        GAME_STATE.x_pos -= 3;
+    } if(GAME_STATE.move_right){
+        GAME_STATE.x_pos += 3;
+    }
+
+}
+
+const $player = document.querySelector(".player");
+setPosition($player, GAME_STATE.x_pos, GAME_STATE.y_pos);
+
 function keyPress(event){
     if(event.keyCode === KEY_RIGHT){
-        STATE.move_right = true;
+        GAME_STATE.move_right = true;
     } else if(event.keyCode === KEY_LEFT){
-        STATE.move_left = true;
+        GAME_STATE.move_left = true;
     }
 }
 function keyRelease(event){
     if(event.keyCode === KEY_RIGHT){
-        STATE.move_right = false;
+        GAME_STATE.move_right = false;
     } else if(event.keyCode === KEY_LEFT){
-        STATE.move_left = false;
+        GAME_STATE.move_left = false;
     }
 }
 
-function update()
-
-function clamp(v, min, max) {
-    if (v < min) {
-        return min;
-    } else if (v > max) {
-        return max;
-    } else {
-        return v;
-    }
+function update(){
+    updatePlayer()
 }
-
-function rand(min, max) {
-    if (min === undefined) min = 0;
-    if (max === undefined) max = 1;
-    return min + Math.random() * (max - min);
-}
-
 
 
 const $container = document.querySelector(".main");
 createPlayer($container);
 
 window.addEventListener("keydown", keyPress);
-window.addEventListener("keyup", keyRelease)
+window.addEventListener("keyup", keyRelease);
+
+
