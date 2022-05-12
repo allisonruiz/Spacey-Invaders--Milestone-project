@@ -16,6 +16,8 @@ const ENEMY_VERTICAL_PADDING = 70;
 const ENEMY_VERTICAL_SPACING = 80;
 const ENEMY_COOLDOWN = 5.0;
 
+var audio = new Audio("sound/Into The Spaceship.mp3");
+audio.play();
 
 const GAME_STATE = {
     lastTime: Date.now(),
@@ -69,6 +71,43 @@ function updatePlayer(dt, $container){
     setPosition($player, GAME_STATE.playerX, GAME_STATE.playerY);  
 }
 
+function createLaser($container, x, y){
+    const $element = document.createElement("img");
+    $element.src = "img/laser.png";
+    $element.className = "laser";
+    $container.appendChild($element);
+    setPosition($element, x, y);
+}
+
+function updateLasers(dt, $container) {
+    const lasers= GAME_STATE.lasers;
+    for (let i = 0; i <lasers.length; i ++){
+        const laser = lasers[i];
+        laser.y -= dt * LASER_MAX_SPEED;
+        if (laser.y <0){
+            destroyLaser($container, laser);
+        }
+        setPosition(laser.$element, laser.x, laser.y);
+        const r1 = laser.$element.getBoundingClientRect();
+        const enemies = GAME_STATE.enemies;
+        for (let j= 0; j < enemies.length; j ++) {
+            const enemy = enemies[j];
+            if (enemy.isDead) continue;
+            const r2 = enemy.$element.getBoundingClientRect();
+            if (rectsIntersect(r1, r2)) {
+              destroyEnemy($container, enemy);
+              destroyLaser($container, laser);
+              break;
+        }
+    }
+}
+}
+function destroyLaser($container, laser) {
+    $container.removeChild(laser.$element);
+    laser.isDead = true;
+  }
+  
+
 function onKeyDown(event){
     if(event.keyCode === KEY_CODE_RIGHT){
         GAME_STATE.move_right = true;
@@ -98,5 +137,3 @@ init();
 window.addEventListener("keydown", onKeyDown);
 window.addEventListener("keyup", onKeyUp);
 window.requestAnimationFrame(update);
-
-update();
