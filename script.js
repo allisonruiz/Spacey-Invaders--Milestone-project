@@ -26,7 +26,9 @@ const GAME_STATE = {
     spacePressed: false,
     playerX: 0,
     playerY: 0,
-    spaceship_width : 50
+    spaceship_width : 50,
+    shoot: false,
+    lasers: []
 };
 
 function rectsIntersect(r1, r2){
@@ -47,6 +49,17 @@ function setSize($element, width){
     $element.style.height = "auto";
 }
 
+function bound(x){
+    if(x >= GAME_WIDTH-GAME_STATE.spaceship_width){
+        GAME_STATE.playerX = GAME_WIDTH-GAME_STATE.spaceship_width;
+        return GAME_STATE.playerX;
+    } if (x<=0){
+        GAME_STATE.playerX = 0;
+        return GAME_STATE.playerX;
+    } else {
+        return x;
+    }
+}
 
 
 function createPlayer($container) {
@@ -64,9 +77,11 @@ function updatePlayer(){
         GAME_STATE.playerX -= 3;
     } if(GAME_STATE.move_right){
         GAME_STATE.playerX += 3;
+    } if(GAME_STATE.shoot){
+        createLaser($container, GAME_STATE.playerX - GAME_STATE.spaceship_width/2,GAME_STATE.playerY);
     }
     const $player = document.querySelector(".player");
-    setPosition($player, GAME_STATE.playerX, GAME_STATE.playerY);
+    setPosition($player, bound(GAME_STATE.playerX), GAME_STATE.playerY);
 }
 
 function destroyPlayer($container, player) {
@@ -75,6 +90,11 @@ function destroyPlayer($container, player) {
 }
 
 const $player = document.querySelector(".player");
+
+function init(){
+    const $container = document.querySelector(".game");
+    createPlayer($container);
+}
   
 
 function createLaser($container, x, y){
@@ -82,37 +102,20 @@ function createLaser($container, x, y){
     $element.src = "img/laser.png";
     $element.className = "laser";
     $container.appendChild($element);
+    const laser = {x, y, $element};
+    GAME_STATE.lasers.push(laser);
     setPosition($element, x, y);
 }
 
-function updateLasers(dt, $container) {
+function updateLasers($container) {
     const lasers= GAME_STATE.lasers;
-    for (let i = 0; i <lasers.length; i ++){
+    for (let i = 0; i < lasers.length; i ++){
         const laser = lasers[i];
-        laser.y -= dt * LASER_MAX_SPEED;
-        if (laser.y <0){
-            destroyLaser($container, laser);
-        }
+        laser.y -=2;
         setPosition(laser.$element, laser.x, laser.y);
-        const r1 = laser.$element.getBoundingClientRect();
-        const enemies = GAME_STATE.enemies;
-        for (let j= 0; j < enemies.length; j ++) {
-            const enemy = enemies[j];
-            if (enemy.isDead) continue;
-            const r2 = enemy.$element.getBoundingClientRect();
-            if (rectsIntersect(r1, r2)) {
-              destroyEnemy($container, enemy);
-              destroyLaser($container, laser);
-              break;
-        }
     }
 }
-}
-function destroyLaser($container, laser) {
-    $container.removeChild(laser.$element);
-    laser.isDead = true;
-  }
-  
+
 
 function onKeyDown(event){
     if(event.keyCode === KEY_CODE_RIGHT){
@@ -121,6 +124,8 @@ function onKeyDown(event){
     } else if(event.keyCode === KEY_CODE_LEFT){
         GAME_STATE.move_left = true;
         console.log("left key is pressed");
+    } else if (event.keyCode === KEY_CODE_SPACE){
+        GAME_STATE.shoot = true;
     }
 }
 function onKeyUp(event){
@@ -128,22 +133,24 @@ function onKeyUp(event){
         GAME_STATE.move_right = false;
     } else if(event.keyCode === KEY_CODE_LEFT){
         GAME_STATE.move_left = false;
+    } else if (event.keyCode === KEY_CODE_SPACE){
+        GAME_STATE.shoot = false;
     }
 }
-function init() {
-    const $container = document.querySelector(".game");
-    createPlayer($container);
-}
+
+const $container = document.querySelector(".game");
+createPlayer($container);
+
 
 function update(){
     updatePlayer();
+    updateLasers($container);
     window.requestAnimationFrame(update);
 }
-
 
 init();
 window.addEventListener("keydown", onKeyDown);
 window.addEventListener("keyup", onKeyUp);
-window.requestAnimationFrame(update);
+
 
 update();
