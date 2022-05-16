@@ -16,18 +16,17 @@ const ENEMY_VERTICAL_PADDING = 70;
 const ENEMY_VERTICAL_SPACING = 80;
 const ENEMY_COOLDOWN = 5.0;
 
-var audio = new Audio("sound/Into The Spaceship.mp3");
-audio.play();
+// //yuh
+// var audio = new Audio("sound/Into The Spaceship.mp3");
+// audio.play();
 
 const GAME_STATE = {
-    lastTime: Date.now(),
     leftPressed: false,
     rightPressed: false,
-    spacePressed:false,
+    spacePressed: false,
     playerX: 0,
     playerY: 0,
-    playerCooldown: 0,
-    gaveOver:false
+    spaceship_width : 50
 };
 
 function rectsIntersect(r1, r2){
@@ -40,9 +39,14 @@ function rectsIntersect(r1, r2){
 }
 
 
-function setPosition(el, x, y) {
-    el.style.transform = `translate(${x}px, ${y}px)`;
+function setPosition($element, x, y) {
+    $element.style.transform = `translate(${x}px, ${y}px)`;
 };
+function setSize($element, width){
+    $element.style.width = `${width}px`;
+    $element.style.height = "auto";
+}
+
 
 
 function createPlayer($container) {
@@ -55,21 +59,23 @@ function createPlayer($container) {
     setPosition($player, GAME_STATE.playerX, GAME_STATE.playerY);
 }
 
+function updatePlayer(){
+    if (GAME_STATE.move_left){
+        GAME_STATE.playerX -= 3;
+    } if(GAME_STATE.move_right){
+        GAME_STATE.playerX += 3;
+    }
+    const $player = document.querySelector(".player");
+    setPosition($player, GAME_STATE.playerX, GAME_STATE.playerY);
+}
+
 function destroyPlayer($container, player) {
     $container.removeChild(player);
     GAME_STATE.gaveOver = true;
 }
 
-function updatePlayer(dt, $container){
-    if(GAME_STATE.leftPressed){
-        GAME_STATE.playerX -= dt * PLAYER_MAX_SPEED;
-    } if(GAME_STATE.rightPressed){
-        GAME_STATE.playerX += dt * PLAYER_MAX_SPEED;
-    }
-
-    const $player = document.querySelector(".player");
-    setPosition($player, GAME_STATE.playerX, GAME_STATE.playerY);  
-}
+const $player = document.querySelector(".player");
+  
 
 function createLaser($container, x, y){
     const $element = document.createElement("img");
@@ -111,8 +117,10 @@ function destroyLaser($container, laser) {
 function onKeyDown(event){
     if(event.keyCode === KEY_CODE_RIGHT){
         GAME_STATE.move_right = true;
+        console.log("Right key is pressed");
     } else if(event.keyCode === KEY_CODE_LEFT){
         GAME_STATE.move_left = true;
+        console.log("left key is pressed");
     }
 }
 function onKeyUp(event){
@@ -137,3 +145,5 @@ init();
 window.addEventListener("keydown", onKeyDown);
 window.addEventListener("keyup", onKeyUp);
 window.requestAnimationFrame(update);
+
+update();
