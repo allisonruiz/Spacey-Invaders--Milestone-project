@@ -28,7 +28,8 @@ const GAME_STATE = {
     playerY: 0,
     spaceship_width : 50,
     shoot: false,
-    lasers: []
+    lasers: [],
+    cooldown: 0
 };
 
 function rectsIntersect(r1, r2){
@@ -77,11 +78,15 @@ function updatePlayer(){
         GAME_STATE.playerX -= 3;
     } if(GAME_STATE.move_right){
         GAME_STATE.playerX += 3;
-    } if(GAME_STATE.shoot){
+    } if(GAME_STATE.shoot && GAME_STATE.cooldown == 0){
         createLaser($container, GAME_STATE.playerX - GAME_STATE.spaceship_width/2,GAME_STATE.playerY);
+        GAME_STATE.cooldown = 30;
     }
     const $player = document.querySelector(".player");
     setPosition($player, bound(GAME_STATE.playerX), GAME_STATE.playerY);
+    if(GAME_STATE.cooldown > 0){
+        GAME_STATE.cooldown -= 0.5;
+    }
 }
 
 function destroyPlayer($container, player) {
