@@ -139,8 +139,6 @@ function onKeyUp(event){
 }
 
 const $container = document.querySelector(".game");
-createPlayer($container);
-
 
 function update(){
     updatePlayer();
