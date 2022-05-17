@@ -27,9 +27,12 @@ const GAME_STATE = {
     playerX: 0,
     playerY: 0,
     spaceship_width : 50,
+    enemy_width: 50,
     shoot: false,
     lasers: [],
-    cooldown: 0
+    enemies: [],
+    cooldown: 0,
+    number_of_enemies: 16,
 };
 
 function rectsIntersect(r1, r2){
@@ -62,6 +65,20 @@ function bound(x){
     }
 }
 
+function deleteLaser(lasers, laser, $element){
+    const index = lasers.indexOf(laser);
+    lasers.splice(index, 1);
+    $container.removeChild($element);
+}
+
+function collideRect(rect1, rect2){
+    return!(rect2.left>rect1.right||
+        rect2.right < rect1.left ||
+        rect2.top> rect1.bottom||
+        rect2.bottom < rect1.top);
+}
+
+//player
 
 function createPlayer($container) {
     GAME_STATE.playerX= GAME_WIDTH/2;
@@ -83,10 +100,11 @@ function updatePlayer(){
         GAME_STATE.cooldown = 30;
     }
     const $player = document.querySelector(".player");
-    setPosition($player, bound(GAME_STATE.playerX), GAME_STATE.playerY);
+    setPosition($player, bound(GAME_STATE.playerX), GAME_STATE.playerY-10);
     if(GAME_STATE.cooldown > 0){
         GAME_STATE.cooldown -= 0.5;
     }
+    console.log(GAME_STATE.cooldown);
 }
 
 function destroyPlayer($container, player) {
@@ -101,7 +119,7 @@ function init(){
     createPlayer($container);
 }
   
-
+//lasers
 function createLaser($container, x, y){
     const $element = document.createElement("img");
     $element.src = "img/laser.png";
@@ -117,11 +135,58 @@ function updateLasers($container) {
     for (let i = 0; i < lasers.length; i ++){
         const laser = lasers[i];
         laser.y -=2;
+        if(laser.y < 0){
+            deleteLaser(lasers, laser, laser.$element);
+        }
         setPosition(laser.$element, laser.x, laser.y);
+        const laser_rectangle = laser.$element.getBoundingClientRect();
+        const enemies = GAME_STATE.enemies;
+        for(let j=0; j<enemies.length; j++){
+            const enemy = enemies[j];
+            const enemy_rectangle = enemy.$enemy.getBoundingClientRect();
+            if(collideRect(enemy_rectangle, laser_rectangle)){
+                deleteLaser(lasers, laser, laser.$element);
+                const index = enemies.indexOf(enemy);
+                enemies.splice(index,1);
+                $container.removeChild(enemy.$enemy);
+            }
+        }
     }
 }
 
+//Enemies
+function createEnemy($container, x, y){
+    const $enemy = document.createElement("img");
+    $enemy.src = "img/enemy.png";
+    $enemy.className = "enemy";
+    $container.appendChild($enemy);
+    const enemny ={x, y, $enemy}
+    GAME_STATE.enemies.push(enemny);
+    setSize($enemy, GAME_STATE.enemy_width);
+    setPosition($enemy, x, y);
+}
 
+function updateEnemies(){
+    const dx = Math.cos(Date.now()/1000)*40;
+    const dy = Math.cos(Date.now()/1000)*30;
+    const enemies = GAME_STATE.enemies;
+    for(let i = 0; i<enemies.length; i++){
+        const enemy = enemies[i];
+        var a = enemy.x + dx;
+        var b = enemy.y + dy;
+        setPosition(enemy.$enemy, a, b);
+    }
+}
+
+function createEnemies($container){
+    for(let i = 0; i<= GAME_STATE.number_of_enemies/2;i++){
+        createEnemy($container, i*80, 100);
+    } for(let i = 0; i<GAME_STATE.number_of_enemies/2;i++){
+        createEnemy($container, i*80, 180);
+    }
+}
+
+//Arrow keys
 function onKeyDown(event){
     if(event.keyCode === KEY_CODE_RIGHT){
         GAME_STATE.move_right = true;
@@ -144,10 +209,13 @@ function onKeyUp(event){
 }
 
 const $container = document.querySelector(".game");
+createEnemies($container);
 
+//update function
 function update(){
     updatePlayer();
     updateLasers($container);
+    updateEnemies();
     window.requestAnimationFrame(update);
 }
 
