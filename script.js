@@ -14,11 +14,13 @@ const ENEMIES_PER_ROW = 10;
 const ENEMY_HORIZONTAL_PADDING = 80;
 const ENEMY_VERTICAL_PADDING = 70;
 const ENEMY_VERTICAL_SPACING = 80;
-const ENEMY_COOLDOWN = 20.0;
+const ENEMY_COOLDOWN = 40.0;
+
 
 // //yuh
-// var audio = new Audio("sound/Into The Spaceship.mp3");
-// audio.play();
+const audio = new Audio("sound/Into The Spaceship.mp3");
+audio.play();
+audio.volume = 0.3;
 
 const GAME_STATE = {
     leftPressed: false,
