@@ -75,6 +75,12 @@ footer {
     margin-left: -367px;
     height: 30px;
   }
+
+.game .enemyLaser {
+    position: absolute;
+    margin-left: -367px;
+    height: 30px;
+  }
 .congratulations {
     display: none;
     position: absolute;

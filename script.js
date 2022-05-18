@@ -2,10 +2,10 @@ const KEY_CODE_LEFT = 37;
 const KEY_CODE_RIGHT = 39;
 const KEY_CODE_SPACE = 32;
 
-const GAME_WIDTH = 800;
+const GAME_WIDTH = 740;
 const GAME_HEIGHT = 600;
 
-const PLAYER_WIDTH = 20;
+const PLAYER_WIDTH = 32;
 const PLAYER_MAX_SPEED = 600.0;
 const LASER_MAX_SPEED = 300.0;
 const LASER_COOLDOWN = 1.0;
@@ -14,7 +14,7 @@ const ENEMIES_PER_ROW = 10;
 const ENEMY_HORIZONTAL_PADDING = 80;
 const ENEMY_VERTICAL_PADDING = 70;
 const ENEMY_VERTICAL_SPACING = 80;
-const ENEMY_COOLDOWN = 5.0;
+const ENEMY_COOLDOWN = 20.0;
 
 // //yuh
 // var audio = new Audio("sound/Into The Spaceship.mp3");
@@ -31,8 +31,11 @@ const GAME_STATE = {
     shoot: false,
     lasers: [],
     enemies: [],
+    enemyLasers: [],
     cooldown: 0,
     number_of_enemies: 16,
+    enemy_cooldown: 0,
+    gameOver: false,
 };
 
 function rectsIntersect(r1, r2){
@@ -53,30 +56,23 @@ function setSize($element, width){
     $element.style.height = "auto";
 }
 
-function bound(x){
-    if(x >= GAME_WIDTH-GAME_STATE.spaceship_width){
-        GAME_STATE.playerX = GAME_WIDTH-GAME_STATE.spaceship_width;
-        return GAME_STATE.playerX;
-    } if (x<=0){
-        GAME_STATE.playerX = 0;
-        return GAME_STATE.playerX;
+
+function clamp(v, min, max) {
+    if (v < min) {
+      return min;
+    } else if (v > max) {
+      return max;
     } else {
-        return x;
+      return v;
     }
-}
+  }
 
-function deleteLaser(lasers, laser, $element){
-    const index = lasers.indexOf(laser);
-    lasers.splice(index, 1);
-    $container.removeChild($element);
-}
+  function rand(min, max){
+      if (min === undefined) min = 0;
+      if (max === undefined) max = 1;
+      return min + Math.random() * (max - min);
+  }
 
-function collideRect(rect1, rect2){
-    return!(rect2.left>rect1.right||
-        rect2.right < rect1.left ||
-        rect2.top> rect1.bottom||
-        rect2.bottom < rect1.top);
-}
 
 //player
 
@@ -90,68 +86,78 @@ function createPlayer($container) {
     setPosition($player, GAME_STATE.playerX, GAME_STATE.playerY);
 }
 
-function updatePlayer(){
+function updatePlayer(dt, $container){
     if (GAME_STATE.move_left){
-        GAME_STATE.playerX -= 3;
+        //GAME_STATE.playerX -= dt * PLAYER_MAX_SPEED;
+        GAME_STATE.playerX -= 3
+        console.log(GAME_STATE.playerX)
     } if(GAME_STATE.move_right){
-        GAME_STATE.playerX += 3;
-    } if(GAME_STATE.shoot && GAME_STATE.cooldown == 0){
-        createLaser($container, GAME_STATE.playerX - GAME_STATE.spaceship_width/2,GAME_STATE.playerY);
-        GAME_STATE.cooldown = 30;
+        //GAME_STATE.playerX += dt *PLAYER_MAX_SPEED;
+        GAME_STATE.playerX += 3
+        
     }
-    const $player = document.querySelector(".player");
-    setPosition($player, bound(GAME_STATE.playerX), GAME_STATE.playerY-10);
+    GAME_STATE.playerX = clamp(
+        GAME_STATE.playerX,
+        PLAYER_WIDTH,
+        GAME_WIDTH,
+        GAME_WIDTH - PLAYER_WIDTH
+    );
+
+    if(GAME_STATE.shoot && GAME_STATE.cooldown <= 0){
+        createLaser($container, GAME_STATE.playerX, GAME_STATE.playerY);
+        GAME_STATE.cooldown = LASER_COOLDOWN;
+    };
     if(GAME_STATE.cooldown > 0){
-        GAME_STATE.cooldown -= 0.5;
+        GAME_STATE.cooldown -= dt;
     }
-    console.log(GAME_STATE.cooldown);
+    const player = document.querySelector(".player");
+    setPosition(player, GAME_STATE.playerX, GAME_STATE.playerY);
 }
 
 function destroyPlayer($container, player) {
     $container.removeChild(player);
-    GAME_STATE.gaveOver = true;
+    GAME_STATE.gameOver = true;
 }
 
-const $player = document.querySelector(".player");
-
-function init(){
-    const $container = document.querySelector(".game");
-    createPlayer($container);
-}
-  
 //lasers
 function createLaser($container, x, y){
     const $element = document.createElement("img");
     $element.src = "img/laser.png";
     $element.className = "laser";
     $container.appendChild($element);
+    console.log($element);
     const laser = {x, y, $element};
     GAME_STATE.lasers.push(laser);
     setPosition($element, x, y);
 }
 
-function updateLasers($container) {
+function updateLasers(dt, $container) {
     const lasers= GAME_STATE.lasers;
     for (let i = 0; i < lasers.length; i ++){
         const laser = lasers[i];
-        laser.y -=2;
+        laser.y -= dt * LASER_MAX_SPEED;
         if(laser.y < 0){
-            deleteLaser(lasers, laser, laser.$element);
+            deleteLaser($container, laser);
         }
         setPosition(laser.$element, laser.x, laser.y);
-        const laser_rectangle = laser.$element.getBoundingClientRect();
+        const r1 = laser.$element.getBoundingClientRect();
         const enemies = GAME_STATE.enemies;
         for(let j=0; j<enemies.length; j++){
             const enemy = enemies[j];
-            const enemy_rectangle = enemy.$enemy.getBoundingClientRect();
-            if(collideRect(enemy_rectangle, laser_rectangle)){
-                deleteLaser(lasers, laser, laser.$element);
-                const index = enemies.indexOf(enemy);
-                enemies.splice(index,1);
-                $container.removeChild(enemy.$enemy);
+            if (enemy.isDead) continue;
+            const r2 = enemy.$enemy.getBoundingClientRect();
+            if(rectsIntersect(r1, r2)){
+                deleteLaser($container, laser);
+                destroyEnemy($container, enemy);
             }
         }
     }
+    GAME_STATE.lasers = GAME_STATE.lasers.filter(e => !e.isDead);
+}
+
+function deleteLaser($container, laser){
+    $container.removeChild(laser.$element);
+    laser.isDead = true;
 }
 
 //Enemies
@@ -160,7 +166,8 @@ function createEnemy($container, x, y){
     $enemy.src = "img/enemy.png";
     $enemy.className = "enemy";
     $container.appendChild($enemy);
-    const enemny ={x, y, $enemy}
+    const enemy_cooldown = Math.floor(Math.random()*100);
+    const enemny ={x, y, $enemy, enemy_cooldown};
     GAME_STATE.enemies.push(enemny);
     setSize($enemy, GAME_STATE.enemy_width);
     setPosition($enemy, x, y);
@@ -175,6 +182,11 @@ function updateEnemies(){
         var a = enemy.x + dx;
         var b = enemy.y + dy;
         setPosition(enemy.$enemy, a, b);
+        if(enemy.enemy_cooldown == 0){
+            createEnemyLaser($container, a, b);
+            enemy.enemy_cooldown= Math.floor(Math.random()*50)+100;
+        }
+        enemy.enemy_cooldown -= 0.5;
     }
 }
 
@@ -185,6 +197,76 @@ function createEnemies($container){
         createEnemy($container, i*80, 180);
     }
 }
+
+function destroyEnemy($container, enemy){
+    $container.removeChild(enemy.$enemy);
+    enemy.isDead = true;
+}
+
+//enemy lasers
+function createEnemyLaser($container, x, y){
+    const $element = document.createElement("img");
+    $element.src = "img/laser-bolts.png";
+    $element.className = "enemyLaser";
+    $container.appendChild($element);
+    const laser = {x, y, $element};
+    GAME_STATE.enemyLasers.push(laser);
+    setPosition($element, x, y);
+}
+
+function updateEnemyLasers(dt, $container){
+    const lasers = GAME_STATE.enemyLasers;
+    for(let i = 0; i < lasers.length; i++){
+        const laser = GAME_STATE.enemyLasers[i];
+        laser.y += dt * LASER_MAX_SPEED;
+        if(laser.y > GAME_HEIGHT){
+            deleteLaser($container, laser);
+        }
+        setPosition(laser.$element, laser.x, laser.y);
+        const r1 = laser.$element.getBoundingClientRect();
+        const player = document.querySelector(".player");
+        const r2 = player.getBoundingClientRect();
+        if(rectsIntersect(r1, r2)){
+            console.log("Game over");
+            destroyPlayer($container, player);
+            break;
+        }
+    }
+    GAME_STATE.enemyLasers = GAME_STATE.enemyLasers.filter(e => !e.isDead);
+}
+
+function init(){
+    const $container = document.querySelector(".game");
+    createPlayer($container);
+}
+
+const $container = document.querySelector(".game");
+createEnemies($container);
+
+//update function
+function update(){
+    const currentTime = Date.now();
+    const dt = (currentTime - GAME_STATE.lastTime) / 1000.0;
+
+    const $container= document.querySelector(".game");
+    // const $container = document.getElementsByClassName("game");
+    updatePlayer(dt, $container);
+    updateLasers(dt, $container);
+    updateEnemies(dt, $container);
+    updateEnemyLasers(dt, $container);
+
+    GAME_STATE.lastTime = currentTime;
+    window.requestAnimationFrame(update);
+
+    if (GAME_STATE.gameOver){
+        document.querySelector(".game-over").style.display = "block";
+        return;
+    } if (GAME_STATE.enemies.length == 0){
+        document.querySelector(".congratulations").style.display = "block";
+        return;
+    }
+}
+
 
 //Arrow keys
 function onKeyDown(event){
@@ -208,20 +290,7 @@ function onKeyUp(event){
     }
 }
 
-const $container = document.querySelector(".game");
-createEnemies($container);
-
-//update function
-function update(){
-    updatePlayer();
-    updateLasers($container);
-    updateEnemies();
-    window.requestAnimationFrame(update);
-}
-
 init();
 window.addEventListener("keydown", onKeyDown);
 window.addEventListener("keyup", onKeyUp);
-
-
-update();
+window.requestAnimationFrame(update);
